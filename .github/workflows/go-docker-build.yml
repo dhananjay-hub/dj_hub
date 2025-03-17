@@ -1,0 +1,37 @@
+name: Go Docker Build & Test
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'  # Trigger only on valid semantic version tags (vX.Y.Z)
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Run Go Tests
+        run: go test ./...
+
+      - name: Extract tag & short SHA
+        id: vars
+        run: |
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "TIMESTAMP=${TIMESTAMP}" >> $GITHUB_ENV
+          echo "SHORT_SHA=${SHORT_SHA}" >> $GITHUB_ENV
+          echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
+
+      - name: Build Docker Image
+        run: |
+          docker build -t myapp:${TAG_NAME}-${TIMESTAMP}-${SHORT_SHA} .
+
