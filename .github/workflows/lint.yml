@@ -1,0 +1,31 @@
+name: Python Linting
+
+on:  
+  push:
+    branches:
+      - '**'  # Trigger on any branch push
+  pull_request:
+    branches:
+      - '**'  # Run on PRs to ensure quality
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest  # Use latest Ubuntu runner
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4  # Check out the code
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install flake8
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
+
+      - name: Run flake8 linting
+        run: flake8 script.py
+
